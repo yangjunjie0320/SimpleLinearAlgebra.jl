@@ -37,5 +37,4 @@ function kernel(prob::BackSubstitutionProblem)
     return BackSubstitutionSolution(x)
 end
 
-
 export BackSubstitution, kernel

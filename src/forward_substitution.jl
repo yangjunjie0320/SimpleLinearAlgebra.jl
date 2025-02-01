@@ -34,5 +34,4 @@ function kernel(prob::ForwardSubstitutionProblem)
     return ForwardSubstitutionSolution(x)
 end
 
-
 export ForwardSubstitution, kernel

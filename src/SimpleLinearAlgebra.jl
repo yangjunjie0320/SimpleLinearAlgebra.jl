@@ -6,7 +6,7 @@ module SimpleLinearAlgebra
     abstract type LinearSystemSolutionMixin end
 
     function kernel(prob::LinearSystemProblemMixin)
-        throw(MethodError(kernel, (prob,)))
+        MethodError(kernel, (typeof(prob),)) |> throw
     end
 
     include("forward_substitution.jl")
