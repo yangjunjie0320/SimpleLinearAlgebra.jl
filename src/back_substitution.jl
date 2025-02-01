@@ -15,6 +15,8 @@ struct BackSubstitutionSolution <: LinearSystemSolutionMixin
     x::AbstractVector
 end
 
+BackSubstitution = BackSubstitutionProblem
+
 function kernel(prob::BackSubstitutionProblem)
     u = prob.u
     b = copy(prob.b)
@@ -35,4 +37,5 @@ function kernel(prob::BackSubstitutionProblem)
     return BackSubstitutionSolution(x)
 end
 
-export BackSubstitutionProblem, kernel
+
+export BackSubstitution, kernel

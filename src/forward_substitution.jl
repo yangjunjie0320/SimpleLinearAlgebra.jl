@@ -2,14 +2,16 @@ struct ForwardSubstitutionProblem <: LinearSystemProblemMixin
     l::AbstractMatrix
     b::AbstractVector
     tol::Real
+
+    function ForwardSubstitutionProblem(l, b, tol)
+        if !istril(l)
+            ArgumentError("Matrix must be lower triangular") |> throw
+        end
+        return new(l, b, tol)
+    end
 end
 
-function ForwardSubstitutionProblem(l, b, tol)
-    if !istril(l)
-        ArgumentError("Matrix must be lower triangular") |> throw
-    end
-    return new(l, b, tol)
-end
+ForwardSubstitution = ForwardSubstitutionProblem
 
 struct ForwardSubstitutionSolution <: LinearSystemSolutionMixin
     x::AbstractVector
@@ -32,4 +34,5 @@ function kernel(prob::ForwardSubstitutionProblem)
     return ForwardSubstitutionSolution(x)
 end
 
-export ForwardSubstitutionProblem, kernel
+
+export ForwardSubstitution, kernel
