@@ -1,4 +1,4 @@
-struct BackSubstitutionProblem <: LinearSystemProblemMixin
+struct BackSubstitutionProblem <: ProblemMixin
     u::AbstractMatrix 
     b::AbstractVector
     tol::Real
@@ -11,7 +11,7 @@ struct BackSubstitutionProblem <: LinearSystemProblemMixin
     end
 end
 
-struct BackSubstitutionSolution <: LinearSystemSolutionMixin
+struct BackSubstitutionSolution <: SolutionMixin
     x::AbstractVector
 end
 

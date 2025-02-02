@@ -1,4 +1,4 @@
-struct ForwardSubstitutionProblem <: LinearSystemProblemMixin
+struct ForwardSubstitutionProblem <: ProblemMixin
     l::AbstractMatrix
     b::AbstractVector
     tol::Real
@@ -13,7 +13,7 @@ end
 
 ForwardSubstitution = ForwardSubstitutionProblem
 
-struct ForwardSubstitutionSolution <: LinearSystemSolutionMixin
+struct ForwardSubstitutionSolution <: SolutionMixin
     x::AbstractVector
 end
 

@@ -2,10 +2,10 @@ module SimpleLinearAlgebra
 
     using LinearAlgebra
 
-    abstract type LinearSystemProblemMixin end
-    abstract type LinearSystemSolutionMixin end
+    abstract type ProblemMixin end
+    abstract type SolutionMixin end
 
-    function kernel(prob::LinearSystemProblemMixin)
+    function kernel(prob::ProblemMixin)
         MethodError(kernel, (typeof(prob),)) |> throw
     end
 
