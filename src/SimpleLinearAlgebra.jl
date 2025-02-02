@@ -11,4 +11,5 @@ module SimpleLinearAlgebra
 
     include("forward_substitution.jl")
     include("back_substitution.jl")
+    include("lufact.jl")
 end

@@ -8,3 +8,7 @@ end
 @testset "backward substitution" begin
     include("backward_substitution.jl")
 end
+
+@testset "LU factorization" begin
+    include("lufact.jl")
+end
