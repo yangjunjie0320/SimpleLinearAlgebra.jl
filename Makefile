@@ -1,21 +1,19 @@
 jl:=julia
 
-init: src/*jl
-	$(jl) -e 'd=pwd(); @assert isdir(d);\
-	using Pkg: activate, instantiate, develop, precompile; \
-	activate(d); instantiate(); activate(joinpath(d, "examples")); \
-	develop(path=d); instantiate(); precompile();'
-	@echo "Environment initialized at: $$PWD"
+init: src/* examples/*
+	$(jl) --project=${PWD} -e 'using Pkg; Pkg.instantiate(); Pkg.precompile();'
+	$(jl) --project=${PWD}/examples -e 'using Pkg; Pkg.develop(path="${PWD}"); Pkg.instantiate(); Pkg.precompile();'
+	echo "Environment initialized at: ${PWD}"
 
-update: src/*jl
-	$(jl) -e 'd=pwd(); @assert isdir(d);\
-	using Pkg: activate, update, develop, precompile; \
-	activate(d); update(); activate(joinpath(d, "examples")); \
-	update(); precompile();'
-	@echo "Environment updated at: $$PWD"
+update: src/* examples/*
+	$(jl) --project=${PWD} -e 'using Pkg; Pkg.update()'
+	$(jl) --project=${PWD}/examples -e 'using Pkg; Pkg.update(); Pkg.precompile()'
+	echo "Environment updated at: ${PWD}"
 
-test: test/*jl
-	@echo "Running tests at: $$PWD"
-	$(jl) -e 'd=pwd(); @assert isdir(d);\
-	using Pkg: activate, test; \
-	activate(d); test();'
+test: src/* test/*
+	echo "Running tests at: ${PWD}"
+	$(jl) --project=${PWD} -e 'using Pkg; Pkg.test();'
+
+# examples: src/* examples/*
+# 	echo "Running examples at: ${PWD}"
+# 	$(jl) --project=${PWD}/examples -e 'using Pkg; include(joinpath(pwd(), "examples", "main.jl"));'

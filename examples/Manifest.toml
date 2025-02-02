@@ -29,7 +29,7 @@ version = "0.3.27+1"
 
 [[deps.SimpleLinearAlgebra]]
 deps = ["LinearAlgebra"]
-path = "/Users/yangjunjie/.julia/dev/SimpleLinearAlgebra"
+path = "/Users/yangjunjie/work/SimpleLinearAlgebra.jl/SimpleLinearAlgebra"
 uuid = "555e9691-8231-4cde-a0d7-6dc20204a59a"
 version = "1.0.0-DEV"
 
