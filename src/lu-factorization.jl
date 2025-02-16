@@ -4,8 +4,8 @@ struct LUFactorizationSolution <: SolutionMixin
 
     function LUFactorizationSolution(l, u)
         s = new(l, u)
-        assert(s, istril(l), "matrix must be lower triangular")
-        assert(s, istriu(u), "matrix must be upper triangular")
+        @assert istril(l) "matrix must be lower triangular"
+        @assert istriu(u) "matrix must be upper triangular"
         return s
     end
 end
@@ -17,15 +17,15 @@ struct Version1 <: LUFactorizationProblemMixin
     tol::Real
 end
 
-function kernel(p::Version1)
-    tol = p.tol
-    u = copy(p.a)
+function kernel(prob::Version1)
+    tol = prob.tol
+    u = copy(prob.a)
     n = size(u, 1)
 
     l = Matrix{Float64}(I, n, n)
 
     for k in 1:n-1
-        assert(p, abs(u[k, k]) > tol, "Gaussian elimination failed")
+        @assert abs(u[k, k]) > tol "Gaussian elimination failed"
 
         m_k = Matrix{Float64}(I, n, n)
         for i in k+1:n
@@ -33,7 +33,7 @@ function kernel(p::Version1)
         end
 
         l = l * inv(m_k)
-        u .= m_k * u
+        u = m_k * u
     end
 
     return LUFactorizationSolution(tril(l), triu(u))
@@ -44,16 +44,16 @@ struct Version2 <: LUFactorizationProblemMixin
     tol::Real
 end
 
-function kernel(p::Version2)
-    tol = p.tol
-    u = copy(p.a)
+function kernel(prob::Version2)
+    tol = prob.tol
+    u = copy(prob.a)
     n = size(u, 1)
 
     # initialize l to be the identity matrix
     l = Matrix{Float64}(I, n, n)
 
     for k in 1:n-1
-        assert(p, abs(u[k, k]) > tol, "Gaussian elimination failed")
+        @assert abs(u[k, k]) > tol "Gaussian elimination failed"
         l[k+1:n, k] = u[k+1:n, k] / u[k, k]
         u[k+1:n, k+1:n] -= l[k+1:n, k] * u[k, k+1:n]'
     end
@@ -61,9 +61,9 @@ function kernel(p::Version2)
     return LUFactorizationSolution(tril(l), triu(u))
 end
 
-LUFactVersion1 = Version1
-LUFactVersion2 = Version2
-export LUFactVersion1, LUFactVersion2
+LUFactorizationV1 = Version1
+LUFactorizationV2 = Version2
+export LUFactorizationV1, LUFactorizationV2
 
-LUFactorizationProblem = Version2
-export LUFactorizationProblem
+LUFactorization = LUFactorizationV2
+export LUFactorization

@@ -3,7 +3,7 @@
     tol = 1e-10
     a = rand(n, n)
 
-    p = LUFactVersion1(a, tol)
+    p = LUFactorizationV1(a, tol)
     s = kernel(p)
     l = s.l
     u = s.u
@@ -18,7 +18,7 @@ end
     tol = 1e-10
     a = rand(n, n)
 
-    p = LUFactVersion2(a, tol)
+    p = LUFactorizationV2(a, tol)
     s = kernel(p)
     l = s.l
     u = s.u
@@ -33,7 +33,7 @@ end
     tol = 1e-10
     a = rand(n, n)
 
-    p = LUFactorizationProblem(a, tol)
+    p = LUFactorization(a, tol)
     s = kernel(p)
     l = s.l
     u = s.u
@@ -47,6 +47,6 @@ end
     n = 10
     tol = 1e-10
     a = zeros(n, n)
-    p = LUFactorizationProblem(a, tol)
-    @test_throws LinearAlgebraError kernel(p)
+    p = LUFactorization(a, tol)
+    @test_throws AssertionError kernel(p)
 end

@@ -5,7 +5,7 @@ struct ForwardSubstitutionProblem <: ProblemMixin
 
     function ForwardSubstitutionProblem(l, b, tol)
         prob = new(l, b, tol)
-        assert(prob, istril(l), "matrix must be lower triangular")
+        @assert istril(l) "matrix must be lower triangular"
         return prob
     end
 end
@@ -25,7 +25,7 @@ function kernel(prob::ForwardSubstitutionProblem)
     x = zeros(n)
 
     for i in 1:n
-        assert(prob, abs(l[i, i]) > tol, "matrix is singular")
+        @assert abs(l[i, i]) > tol "matrix is singular"
         x[i] += b[i] / l[i, i]
 
         if i == 1

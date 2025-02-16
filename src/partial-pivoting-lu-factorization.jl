@@ -3,11 +3,11 @@ struct PartialPivotingLUFactorizationSolution <: SolutionMixin
     u::AbstractMatrix
     p::Vector{Int}
     function PartialPivotingLUFactorizationSolution(l, u, p)
-        s = new(l, u, p)
-        assert(s, istril(l), "matrix must be lower triangular")
-        assert(s, istriu(u), "matrix must be upper triangular")
-        assert(s, isperm(p), "matrix must be a permutation matrix")
-        return s
+        sol = new(l, u, p)
+        @assert istril(l) "matrix must be lower triangular"
+        @assert istriu(u) "matrix must be upper triangular"
+        @assert isperm(p) "matrix must be a permutation matrix"
+        return sol
     end
 end
 
@@ -16,9 +16,11 @@ struct PartialPivotingLUFactorizationProblem <: ProblemMixin
     tol::Real
 end
 
-function kernel(p::PartialPivotingLUFactorizationProblem)
-    tol = p.tol
-    u = copy(p.a)
+PartialPivotingLUFactorization = PartialPivotingLUFactorizationProblem
+
+function kernel(prob::PartialPivotingLUFactorizationProblem)
+    tol = prob.tol
+    u = copy(prob.a)
     n = size(u, 1)
 
     l = zeros(n, n)
@@ -56,4 +58,4 @@ function kernel(p::PartialPivotingLUFactorizationProblem)
     return PartialPivotingLUFactorizationSolution(tril(l), triu(u), p)
 end
 
-export PartialPivotingLUFactorizationProblem
+export PartialPivotingLUFactorization

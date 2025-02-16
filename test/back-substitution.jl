@@ -16,7 +16,7 @@ end
     tol = 1e-10
     u = rand(n, n)
     b = rand(n)
-    @test_throws LinearAlgebraError BackSubstitution(u, b, tol)
+    @test_throws AssertionError BackSubstitution(u, b, tol)
 end
 
 @testset "singular matrix" begin
@@ -25,5 +25,5 @@ end
     u = zeros(n, n)
     b = rand(n)
     prob = BackSubstitution(u, b, tol)
-    @test_throws LinearAlgebraError kernel(prob)
+    @test_throws AssertionError kernel(prob)
 end

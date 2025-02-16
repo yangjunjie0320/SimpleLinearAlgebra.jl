@@ -14,14 +14,6 @@ module SimpleLinearAlgebra
         message::String
     end
 
-    function assert(obj, condition::Bool, message::String)
-        if !condition
-            cls = split(string(typeof(obj)), ".")[2]
-            message = @sprintf("%s failed: %s", cls, message)
-            LinearAlgebraError(message) |> throw
-        end
-    end
-
     include("forward-substitution.jl")
     include("back-substitution.jl")
     include("lu-factorization.jl")

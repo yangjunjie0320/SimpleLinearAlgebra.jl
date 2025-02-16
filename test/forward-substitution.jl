@@ -15,7 +15,7 @@ end
     tol = 1e-10
     l = rand(n, n)
     b = rand(n)
-    @test_throws LinearAlgebraError ForwardSubstitution(l, b, tol)
+    @test_throws AssertionError ForwardSubstitution(l, b, tol)
 end
 
 @testset "singular matrix" begin
@@ -24,5 +24,5 @@ end
     l = zeros(n, n)
     b = rand(n)
     prob = ForwardSubstitution(l, b, tol)
-    @test_throws LinearAlgebraError kernel(prob)
+    @test_throws AssertionError kernel(prob)
 end

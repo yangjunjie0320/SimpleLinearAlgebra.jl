@@ -5,7 +5,7 @@ struct BackSubstitutionProblem <: ProblemMixin
 
     function BackSubstitutionProblem(u, b, tol)
         prob = new(u, b, tol)
-        assert(prob, istriu(u), "matrix must be upper triangular")
+        @assert istriu(u) "matrix must be upper triangular"
         return prob
     end
 end
@@ -26,7 +26,7 @@ function kernel(prob::BackSubstitutionProblem)
     x = zeros(n)
 
     for i in n:-1:1
-        assert(prob, abs(u[i, i]) > tol, "matrix is singular")
+        @assert abs(u[i, i]) > tol "matrix is singular"
         x[i] += b[i] / u[i, i]
 
         if i == n
