@@ -1,14 +1,20 @@
 using SimpleLinearAlgebra
+import SimpleLinearAlgebra: LinearAlgebraError
+
 using Test, LinearAlgebra
 
 @testset "forward substitution" begin
-    include("forward_substitution.jl")
+    include("forward-substitution.jl")
 end
 
-@testset "backward substitution" begin
-    include("backward_substitution.jl")
+@testset "back substitution" begin
+    include("back-substitution.jl")
 end
 
 @testset "LU factorization" begin
-    include("lufact.jl")
+    include("lu-factorization.jl")
+end
+
+@testset "Partial pivoting LU factorization" begin
+    include("partial-pivoting-lu-factorization.jl")
 end

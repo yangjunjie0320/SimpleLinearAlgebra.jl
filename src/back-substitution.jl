@@ -4,10 +4,9 @@ struct BackSubstitutionProblem <: ProblemMixin
     tol::Real
 
     function BackSubstitutionProblem(u, b, tol)
-        if !istriu(u)
-            ArgumentError("Matrix must be upper triangular") |> throw
-        end
-        return new(u, b, tol)
+        prob = new(u, b, tol)
+        assert(prob, istriu(u), "matrix must be upper triangular")
+        return prob
     end
 end
 
@@ -25,13 +24,16 @@ function kernel(prob::BackSubstitutionProblem)
 
     # solve the system
     x = zeros(n)
-    x[n] = b[n] / u[n, n]
 
-    for i in n-1:-1:1
-        if abs(u[i, i]) < tol
-            throw(ArgumentError("Matrix is singular"))
+    for i in n:-1:1
+        assert(prob, abs(u[i, i]) > tol, "matrix is singular")
+        x[i] += b[i] / u[i, i]
+
+        if i == n
+            continue
         end
-        x[i] = (b[i] - sum(u[i, j] * x[j] for j in i+1:n)) / u[i, i]
+
+        x[i] -= u[i, i+1:n]' * x[i+1:n] / u[i, i]
     end
 
     return BackSubstitutionSolution(x)

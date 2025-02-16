@@ -1,5 +1,5 @@
 @testset "LU factorization version 1" begin
-    n = 4
+    n = 10
     tol = 1e-10
     a = rand(n, n)
 
@@ -41,4 +41,12 @@ end
     @test istril(l)
     @test istriu(u)
     @test maximum(abs, a - l * u) < tol
+end
+
+@testset "singular matrix" begin
+    n = 10
+    tol = 1e-10
+    a = zeros(n, n)
+    p = LUFactorizationProblem(a, tol)
+    @test_throws LinearAlgebraError kernel(p)
 end

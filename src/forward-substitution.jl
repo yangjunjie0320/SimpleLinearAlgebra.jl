@@ -4,10 +4,9 @@ struct ForwardSubstitutionProblem <: ProblemMixin
     tol::Real
 
     function ForwardSubstitutionProblem(l, b, tol)
-        if !istril(l)
-            ArgumentError("Matrix must be lower triangular") |> throw
-        end
-        return new(l, b, tol)
+        prob = new(l, b, tol)
+        assert(prob, istril(l), "matrix must be lower triangular")
+        return prob
     end
 end
 
@@ -24,12 +23,16 @@ function kernel(prob::ForwardSubstitutionProblem)
     tol = prob.tol
 
     x = zeros(n)
-    x[1] = b[1] / l[1, 1]
-    for i in 2:n
-        if abs(l[i, i]) < tol
-            ArgumentError("Matrix is singular") |> throw
+
+    for i in 1:n
+        assert(prob, abs(l[i, i]) > tol, "matrix is singular")
+        x[i] += b[i] / l[i, i]
+
+        if i == 1
+            continue
         end
-        x[i] = (b[i] - sum(l[i, j] * x[j] for j in 1:i-1)) / l[i, i]
+        
+        x[i] -= l[i, 1:i-1]' * x[1:i-1] / l[i, i]
     end
     return ForwardSubstitutionSolution(x)
 end
