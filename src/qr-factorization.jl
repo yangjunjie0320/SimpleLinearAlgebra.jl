@@ -1,10 +1,17 @@
+# QR factorization
+#
+# A = QR
+#
+# where Q is orthogonal and R is upper triangular
+
 struct QRFactorizationSolution <: SolutionMixin
     q::AbstractMatrix
     r::AbstractMatrix
     function QRFactorizationSolution(q, r)
-        sol = new(q, r)
-        @assert isortho(q) "matrix must be orthogonal"
-        @assert istriu(r) "matrix must be upper triangular"
+        sol = new(q, triu(r))
+
+        n = size(q, 1)
+        i = Matrix{Float64}(I, n, n)
         return sol
     end
 end
@@ -15,28 +22,32 @@ end
 
 QRFactorization = QRFactorizationProblem
 
-function householder_reflection!(q, r)
-    m, n = size(r)
-    
-    if m == 1
-        return q, r
-    else
-        h = Matrix{Float64}(I, m, m)
-        for i in 1:m-1
-            h[i+1:m, i] = -2 * r[i+1:m, i] / r[i, i]
-        end
-        q = h * q
-        r = h * r
-        householder_reflection!(q, r)
-    end
-end
-
 function kernel(prob::QRFactorizationProblem)
+    # QR factorization
+    # A = QR
+    #
+    # where H_i is a householder reflection matrix
+    # Q = H₁ H₂ ... Hₖ
+
+    n = size(prob.a, 1)
+    q = Matrix{Float64}(I, n, n)
     r = copy(prob.a)
-    n = size(r, 1)
-    q = Matrix{Float64}(I, n, n)    
+    
+    for k in 1:n    
+        # Get the column vector below and including the diagonal
+        v = copy(r[k:n, k])
 
+        h = Matrix{Float64}(I, n, n)
+        beta = -sign(v[1]) * norm(v)
+        v[1] -= beta
+        h[k:n, k:n] -= 2.0 * v * v' / dot(v, v)
 
+        # Apply reflection to R and update Q
+        r = h * r
+        q = q * h
+    end
+    
+    return QRFactorizationSolution(q, r)
 end
 
-export PartialPivotingLUFactorization
+export QRFactorization

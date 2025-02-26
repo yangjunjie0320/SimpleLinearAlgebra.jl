@@ -18,4 +18,5 @@ module SimpleLinearAlgebra
     include("back-substitution.jl")
     include("lu-factorization.jl")
     include("partial-pivoting-lu-factorization.jl")
+    include("qr-factorization.jl")
 end

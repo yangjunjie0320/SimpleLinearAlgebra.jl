@@ -18,3 +18,7 @@ end
 @testset "Partial pivoting LU factorization" begin
     include("partial-pivoting-lu-factorization.jl")
 end
+
+@testset "QR factorization" begin
+    include("qr-factorization.jl")
+end
