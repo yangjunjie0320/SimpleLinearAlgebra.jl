@@ -1,6 +1,4 @@
 using SimpleLinearAlgebra
-import SimpleLinearAlgebra: LinearAlgebraError
-
 using Test, LinearAlgebra
 
 @testset "forward substitution" begin
@@ -12,13 +10,9 @@ end
 end
 
 @testset "LU factorization" begin
-    include("lu-factorization.jl")
-end
-
-@testset "Partial pivoting LU factorization" begin
-    include("partial-pivoting-lu-factorization.jl")
+    include("lu.jl")
 end
 
 @testset "QR factorization" begin
-    include("qr-factorization.jl")
+    include("qr.jl")
 end

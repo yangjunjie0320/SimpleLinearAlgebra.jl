@@ -16,7 +16,8 @@ module SimpleLinearAlgebra
 
     include("forward-substitution.jl")
     include("back-substitution.jl")
-    include("lu-factorization.jl")
-    include("partial-pivoting-lu-factorization.jl")
-    include("qr-factorization.jl")
+    include("lu.jl")
+    include("qr.jl")
+
+    export kernel
 end

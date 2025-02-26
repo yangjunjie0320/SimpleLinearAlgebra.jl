@@ -3,14 +3,12 @@ struct ForwardSubstitutionProblem <: ProblemMixin
     b::AbstractVector
     tol::Real
 
-    function ForwardSubstitutionProblem(l, b, tol)
+    function ForwardSubstitutionProblem(l, b, tol=1e-10)
         prob = new(l, b, tol)
         @assert istril(l) "matrix must be lower triangular"
         return prob
     end
 end
-
-ForwardSubstitution = ForwardSubstitutionProblem
 
 struct ForwardSubstitutionSolution <: SolutionMixin
     x::AbstractVector
@@ -37,4 +35,5 @@ function kernel(prob::ForwardSubstitutionProblem)
     return ForwardSubstitutionSolution(x)
 end
 
-export ForwardSubstitution, kernel
+ForwardSubstitution = ForwardSubstitutionProblem
+export ForwardSubstitution

@@ -3,7 +3,7 @@ struct BackSubstitutionProblem <: ProblemMixin
     b::AbstractVector
     tol::Real
 
-    function BackSubstitutionProblem(u, b, tol)
+    function BackSubstitutionProblem(u, b, tol=1e-10)
         prob = new(u, b, tol)
         @assert istriu(u) "matrix must be upper triangular"
         return prob
@@ -13,8 +13,6 @@ end
 struct BackSubstitutionSolution <: SolutionMixin
     x::AbstractVector
 end
-
-BackSubstitution = BackSubstitutionProblem
 
 function kernel(prob::BackSubstitutionProblem)
     u = prob.u
@@ -39,4 +37,5 @@ function kernel(prob::BackSubstitutionProblem)
     return BackSubstitutionSolution(x)
 end
 
-export BackSubstitution, kernel
+BackSubstitution = BackSubstitutionProblem
+export BackSubstitution
