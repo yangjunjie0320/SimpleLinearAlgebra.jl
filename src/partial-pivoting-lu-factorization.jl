@@ -27,21 +27,12 @@ function kernel(prob::PartialPivotingLUFactorizationProblem)
     p = collect(1:n)
 
     for k in 1:n-1
-        v, x = findmax(abs.(u[k:n, k]))
+        v, x = findmax(i->abs(u[i, k]), k:n)
         x += k - 1
 
         if x != k
-            # swap row k and row x of matrix u
-            for i in 1:n
-                u[k, i], u[x, i] = u[x, i], u[k, i]
-            end
-
-            # swap row k and row x of matrix l
-            for i in 1:n
-                l[k, i], l[x, i] = l[x, i], l[k, i]
-            end
-
-            # swap row k and row x of matrix p
+            u[k, :], u[x, :] = u[x, :], u[k, :]
+            l[k, :], l[x, :] = l[x, :], l[k, :]
             p[k], p[x] = p[x], p[k]
         end
 

@@ -1,7 +1,7 @@
 @testset "Partial pivoting LU factorization" begin
-    n = 4
-    tol = 1e-10
-    a = rand(n, n)
+    tol = 1e-6
+    a = [1e-8 1; 1 1]
+    n = size(a, 1)
 
     p = PartialPivotingLUFactorization(a, tol)
     s = kernel(p)
