@@ -1,5 +1,5 @@
 module SimpleLinearAlgebra
-    using LinearAlgebra, Printf
+    using LinearAlgebra
 
     abstract type ProblemMixin end
     abstract type SolutionMixin end
