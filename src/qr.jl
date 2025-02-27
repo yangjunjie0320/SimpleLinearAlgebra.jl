@@ -167,3 +167,53 @@ end
 
 kernel(prob::QRFactorizationProblem) = QR.kernel(prob)
 export QR
+
+struct SymmetricQRFactorizationProblem <: ProblemMixin
+    a::AbstractMatrix
+    tol::Real
+    function SymmetricQRFactorizationProblem(a, tol=1e-10)
+        prob = new(a, tol)
+        return prob
+    end
+end
+
+struct SymmetricQRFactorizationSolution <: SolutionMixin
+    q::AbstractMatrix
+    r::AbstractMatrix
+    function SymmetricQRFactorizationSolution(q, r)
+        r = triu(r, -2)
+        r = tril(r,  2)
+        @assert isapprox(q' * q, I) "matrix must be orthogonal"
+        soln = new(q, r)
+        return soln
+    end
+end
+
+function kernel(prob::SymmetricQRFactorizationProblem)
+    tol = prob.tol
+    n = size(prob.a, 1)
+    q = Matrix{Float64}(I, n, n)
+    r = copy(prob.a)
+    
+    for i in 1:n-1
+        # Get the column vector below and including the diagonal
+        vi = copy(r[(i+1):n, i])
+        vi[1] += sign(vi[1]) * norm(vi)
+        beta = 2.0 / dot(vi, vi)
+        hi = I - beta * vi * vi' # shape (n-i-1, n-i-1)
+
+        r[(i+1):n, i:n] = hi * r[(i+1):n, i:n]
+        r[i:n, (i+1):n] = r[i:n, (i+1):n] * hi'
+        q[:, (i+1):n] = q[:, (i+1):n] * hi'
+    end
+
+    @assert isapprox(q' * q, I, atol=tol) "q is not orthogonal"
+    @assert isapprox(q * r * q', prob.a, atol=tol) "q * r * q' is not equal to a"
+    
+    soln = SymmetricQRFactorizationSolution(q, r)
+    return soln
+end
+
+SymmetricQRFactorization = SymmetricQRFactorizationProblem
+SymmetricQRDecomposition = SymmetricQRFactorizationProblem
+export SymmetricQRFactorization, SymmetricQRDecomposition

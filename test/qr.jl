@@ -64,3 +64,21 @@ end
     @test isapprox(q' * q, I, atol=tol)
     @test isapprox(a, q * r, atol=tol)
 end
+
+@testset "Symmetric QR factorization" begin
+    n = 4
+    a = rand(n, n)
+    a = a * a'
+
+    prob = SymmetricQRFactorization(a, 1e-6)
+    tol = prob.tol
+
+    soln = kernel(prob)
+    q = soln.q
+    r = soln.r
+    
+    @test isapprox(r, triu(r, -2), atol=tol)
+    @test isapprox(r, tril(r,  2), atol=tol)
+    @test isapprox(q' * q, I, atol=tol)
+    @test isapprox(a, q * r * q', atol=tol)
+end
