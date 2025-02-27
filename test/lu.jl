@@ -4,7 +4,7 @@ import SimpleLinearAlgebra.LU
     n = 10
     a = rand(n, n)
 
-    prob = LU.Version1(a)
+    prob = LU.GaussianEliminationV1(a)
     tol = prob.tol
 
     soln = kernel(prob)
@@ -20,7 +20,7 @@ end
     n = 10
     a = rand(n, n)
 
-    prob = LU.Version2(a)
+    prob = LU.GaussianEliminationV2(a)
     tol = prob.tol
 
     soln = kernel(prob)
@@ -49,14 +49,15 @@ end
 end
 
 @testset "singular matrix" begin
-    n = 10
-    a = zeros(n, n)
-    prob = SimpleLinearAlgebra.LUFactorization(a)
+    a = [0.0 1.0; 1.0 1.0]
+    n = size(a, 1)
+
+    prob = LUFactorization(a)
     @test_throws AssertionError kernel(prob)
 end
 
 @testset "Partial pivoting LU factorization" begin
-    a = [1e-8 1; 1 1]
+    a = [0.0 1.0; 1.0 1.0]
     n = size(a, 1)
 
     prob = LU.PartialPivoting(a)

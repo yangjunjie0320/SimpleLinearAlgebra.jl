@@ -34,10 +34,26 @@ end
 end
 
 @testset "QR factorization with Gram-Schmidt" begin
-    n = 10
+    n = 20
     a = rand(n, n)
 
     prob = QR.GramSchmidt(a)
+    tol = prob.tol
+
+    soln = kernel(prob)
+    q = soln.q
+    r = soln.r
+
+    @test istriu(r)
+    @test isapprox(q' * q, I, atol=tol)
+    @test isapprox(a, q * r, atol=tol)
+end
+
+@testset "QR factorization with modified Gram-Schmidt" begin
+    n = 20
+    a = rand(n, n)
+
+    prob = QR.ModifiedGramSchmidt(a)
     tol = prob.tol
 
     soln = kernel(prob)

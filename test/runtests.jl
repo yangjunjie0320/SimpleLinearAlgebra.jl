@@ -2,11 +2,11 @@ using SimpleLinearAlgebra
 using Test, LinearAlgebra
 
 @testset "forward substitution" begin
-    include("forward-substitution.jl")
+    include("forward.jl")
 end
 
 @testset "back substitution" begin
-    include("back-substitution.jl")
+    include("back.jl")
 end
 
 @testset "LU factorization" begin

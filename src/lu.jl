@@ -16,46 +16,56 @@ module LU
         end
     end
 
-    struct Version1 <: LUFactorizationProblemMixin
+    struct GaussianEliminationV1 <: LUFactorizationProblemMixin
         a::AbstractMatrix
         tol::Real
-        function Version1(a, tol=1e-10)
+        function GaussianEliminationV1(a, tol=1e-10)
             prob = new(a, tol)
             return prob
         end
     end
 
-    function kernel(prob::Version1)
+    function kernel(prob::GaussianEliminationV1)
         tol = prob.tol
         u = copy(prob.a)
         n = size(u, 1)
 
         l = Matrix{Float64}(I, n, n)
+        # l * u = a now, we insert resolution of the identity matrix
+        # l * inv(lk) * lk * u to make l * inv(lk) lower triangular,
+        # and lk * u to make it upper triangular
+        # as lk is constructed from gaussian elimination, lk * lu
+        # will eliminate the k-th column of u
+        # and as inv(lk) is also lower triangular, the product of
+        # l * inv(lk) is lower triangular
 
-        for k in 1:n-1
-            @assert abs(u[k, k]) > tol "Gaussian elimination failed"
+        for i in 1:n-1
+            uii = u[i, i]
+            @assert abs(uii) > tol "Gaussian elimination failed"
+            
+            # lk is lower triangular matrix
+            li = Matrix{Float64}(I, n, n)
+            li[i+1:n, i] -= u[i+1:n, i] / uii
+            li_inv = inv(li)
 
-            m_k = Matrix{Float64}(I, n, n)
-            m_k[k+1:n, k] = -u[k+1:n, k] / u[k, k]
-
-            l = l * inv(m_k)
-            u = m_k * u
+            l = l * li_inv
+            u = li * u
         end
 
         soln = LUFactorizationSolution(tril(l), triu(u))
         return soln
     end
 
-    struct Version2 <: LUFactorizationProblemMixin
+    struct GaussianEliminationV2 <: LUFactorizationProblemMixin
         a::AbstractMatrix
         tol::Real
-        function Version2(a, tol=1e-10)
+        function GaussianEliminationV2(a, tol=1e-10)
             prob = new(a, tol)
             return prob
         end
     end
 
-    function kernel(prob::Version2)
+    function kernel(prob::GaussianEliminationV2)
         tol = prob.tol
         u = copy(prob.a)
         n = size(u, 1)
@@ -63,10 +73,15 @@ module LU
         # initialize l to be the identity matrix
         l = Matrix{Float64}(I, n, n)
 
-        for k in 1:n-1
-            @assert abs(u[k, k]) > tol "Gaussian elimination failed"
-            l[k+1:n, k] = u[k+1:n, k] / u[k, k]
-            u[k+1:n, k+1:n] -= l[k+1:n, k] * u[k, k+1:n]'
+        for i in 1:n-1
+            uii = u[i, i]
+            @assert abs(uii) > tol "Gaussian elimination failed"
+
+            ci = u[i+1:n, i] / uii # shape (n-i, ), the i-th column of U
+            ri = u[i, i+1:n] # shape (1, n-i), the i-th row of U
+            
+            l[i+1:n, i] = ci
+            u[i+1:n, i+1:n] -= ci * ri'
         end
 
         soln = LUFactorizationSolution(tril(l), triu(u))
@@ -99,29 +114,34 @@ module LU
         tol = prob.tol
         u = copy(prob.a)
         n = size(u, 1)
-    
+        
+        # initialize l to be the identity matrix
         l = zeros(n, n)
         p = collect(1:n)
     
-        for k in 1:n-1
-            v, x = findmax(i->abs(u[i, k]), k:n)
-            x += k - 1
+        for i in 1:n-1
+            # v is the max element, x is the index
+            v, j = findmax(u[i:n, i])
+            j += i - 1
     
-            if x != k
-                u[k, :], u[x, :] = u[x, :], u[k, :]
-                l[k, :], l[x, :] = l[x, :], l[k, :]
-                p[k], p[x] = p[x], p[k]
+            if i != j # if the max element is not on the diagonal
+                u[i, :], u[j, :] = u[j, :], u[i, :]
+                l[i, :], l[j, :] = l[j, :], l[i, :]
+                p[i], p[j] = p[j], p[i]
             end
-    
-            if abs(u[k, k]) < tol
+            
+            uii = u[i, i]
+            if abs(uii) < tol
                 continue
             end
-    
-            l[k, k] = 1.0
-            l[k+1:n, k] = u[k+1:n, k] / u[k, k]
-            u[k+1:n, k+1:n] -= l[k+1:n, k] * u[k, k+1:n]'
+            
+            l[i, i] = 1.0
+            ri = u[i, i+1:n]
+            ci = u[i+1:n, i] / uii
+            l[i+1:n, i] = ci
+            u[i+1:n, i+1:n] -= ci * ri'
         end
-    
+        
         l[n, n] = 1.0
         soln = PartialPivotingLUFactorizationSolution(tril(l), triu(u), p)
         return soln
@@ -130,5 +150,5 @@ end
 
 kernel(prob::LUFactorizationProblemMixin) = LU.kernel(prob)
 
-LUFactorization = LU.Version2
+LUFactorization = LU.GaussianEliminationV2
 export LUFactorization

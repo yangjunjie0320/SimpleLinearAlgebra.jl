@@ -16,6 +16,8 @@ end
 
 function kernel(prob::ForwardSubstitutionProblem)
     l = prob.l
+    @assert istril(l) "matrix must be lower triangular"
+
     b = copy(prob.b)
     n = length(b)
     tol = prob.tol
@@ -23,14 +25,17 @@ function kernel(prob::ForwardSubstitutionProblem)
     x = zeros(n)
 
     for i in 1:n
-        @assert abs(l[i, i]) > tol "matrix is singular"
-        x[i] += b[i] / l[i, i]
+        lii = l[i, i]
+        @assert abs(lii) > tol "matrix is singular"
+        x[i] += b[i] / lii
 
         if i == 1
             continue
         end
         
-        x[i] -= l[i, 1:i-1]' * x[1:i-1] / l[i, i]
+        li = l[i, 1:i-1] / lii # shape (i-1, )
+        xi = x[1:i-1]          # shape (i-1, )
+        x[i] -= li' * xi 
     end
     return ForwardSubstitutionSolution(x)
 end

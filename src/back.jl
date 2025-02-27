@@ -24,14 +24,17 @@ function kernel(prob::BackSubstitutionProblem)
     x = zeros(n)
 
     for i in n:-1:1
-        @assert abs(u[i, i]) > tol "matrix is singular"
-        x[i] += b[i] / u[i, i]
+        uii = u[i, i]
+        @assert abs(uii) > tol "matrix is singular"
+        x[i] += b[i] / uii
 
         if i == n
             continue
         end
 
-        x[i] -= u[i, i+1:n]' * x[i+1:n] / u[i, i]
+        ui = u[i, i+1:n] / uii # shape (n-i, )
+        xi = x[i+1:n]          # shape (n-i, )
+        x[i] -= ui' * xi 
     end
 
     return BackSubstitutionSolution(x)

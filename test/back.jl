@@ -1,12 +1,15 @@
+using LinearAlgebra
+
 @testset "backward substitution" begin
     n = 10
-    u = LinearAlgebra.triu(rand(n, n))
+    u = triu(rand(n, n))
     b = rand(n)
 
-    p = BackSubstitution(u, b)
-    s = kernel(p)
-    x = s.x
-    tol = p.tol
+    prob = BackSubstitution(u, b)
+    tol = prob.tol
+
+    soln = kernel(prob)
+    x = soln.x
 
     @test isapprox(u * x, b, atol=tol)
 end

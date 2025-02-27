@@ -30,18 +30,18 @@ module QR
         q = Matrix{Float64}(I, n, n)
         r = copy(prob.a)
         
-        for k in 1:n    
+        for i in 1:n    
             # Get the column vector below and including the diagonal
-            v = copy(r[k:n, k])
+            vi = copy(r[i:n, i])
 
-            h = Matrix{Float64}(I, n, n)
-            beta = -sign(v[1]) * norm(v)
-            v[1] -= beta
-            h[k:n, k:n] -= 2.0 * v * v' / dot(v, v)
+            hi = Matrix{Float64}(I, n, n)
+            beta = -sign(vi[1]) * norm(vi)
+            vi[1] -= beta
+            hi[i:n, i:n] -= 2.0 * vi * vi' / dot(vi, vi)
 
             # Apply reflection to R and update Q
-            r = h * r
-            q = q * h
+            r = hi * r
+            q = q * hi
         end
         
         soln = QRFactorizationSolution(q, triu(r))
@@ -62,22 +62,23 @@ module QR
         q = Matrix{Float64}(I, n, n)
         r = copy(prob.a)
 
-        for i in 1:n
-            for j in i+1:n
-                x, y = r[i, i], r[j, i]
-                c = x / sqrt(x^2 + y^2)
-                s = y / sqrt(x^2 + y^2)
+        ij = [(i, j) for i in 1:n for j in i+1:n]
+        for (i, j) in ij
+            x, y = r[i, i], r[j, i]
+            t = atan(y, x)
 
-                if abs(s) < prob.tol
-                    continue
-                end
-
-                h = Matrix{Float64}(I, n, n)
-                h[[i, j], [i, j]] = [c -s; s c]
-
-                r = h' * r
-                q = q * h
+            if abs(y) < prob.tol
+                continue
             end
+
+            # Manually calculate hij' * r and q * hij
+            ri =  cos(t) * r[i, :] + sin(t) * r[j, :]
+            rj = -sin(t) * r[i, :] + cos(t) * r[j, :]
+            r[i, :], r[j, :] = ri, rj
+
+            qi =  cos(t) * q[:, i] + sin(t) * q[:, j]
+            qj = -sin(t) * q[:, i] + cos(t) * q[:, j]
+            q[:, i], q[:, j] = qi, qj
         end
         return QRFactorizationSolution(q, triu(r))
     end
@@ -105,12 +106,13 @@ module QR
         q[:, 1] /= r[1, 1]
 
         for i in 2:n
-            # q[:, i] = a[:, i]
-            
-            for j in 1:i-1
-                r[j, i] = dot(q[:, j], a[:, i])
-                q[:, i] -= q[:, j] * r[j, i]
-            end
+            # Method 1:
+            qi = q[:, 1:i-1] # shape (n, i-1)
+            ai = a[:, i] # shape (n, )
+            ri = qi' * ai # shape (i-1, )
+
+            r[1:i-1, i] = ri
+            q[:, i] -= qi * ri
 
             r[i, i] = norm(q[:, i])
             @assert r[i, i] > tol "Singular matrix"
@@ -118,6 +120,47 @@ module QR
             q[:, i] /= r[i, i]
         end
 
+        return QRFactorizationSolution(q, triu(r))
+    end
+
+    struct ModifiedGramSchmidt <: QRFactorizationProblem
+        a::AbstractMatrix
+        tol::Real
+        function ModifiedGramSchmidt(a, tol=1e-10)
+            prob = new(a, tol)
+            return prob
+        end
+    end
+
+    function kernel(prob::ModifiedGramSchmidt)
+        a = copy(prob.a)
+        tol = prob.tol
+
+        n = size(a, 1)
+        q = zeros(n, n)
+        r = zeros(n, n)
+    
+        for i in 1:n
+            # vi is normalized vector of a[:, i]
+            # is orthogonal to all the vectors
+            # before i
+            ni = norm(a[:, i])
+            vi = a[:, i] / ni # shape (n, )
+            @assert size(vi) == (n, )
+
+            # ai contains all the vectors
+            # after i
+            ai = a[:, i+1:n] # shape (n, n-i)
+            # ri is the projection of vi into the 
+            # basis spanned by ai
+            ri = vi' * ai # shape (n-i, )
+            @assert size(ri) == (1, n-i)
+
+            r[i, i] = ni
+            r[i, i+1:n] = ri
+            q[:, i] = vi
+            a[:, i+1:n] -= vi * ri
+        end
         return QRFactorizationSolution(q, triu(r))
     end
 end

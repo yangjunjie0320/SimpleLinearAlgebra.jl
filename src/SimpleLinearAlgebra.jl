@@ -1,7 +1,7 @@
 module SimpleLinearAlgebra
 
     using LinearAlgebra, Printf
-    import Printf.@sprintf  # Fixed macro import
+    using OMEinsum
 
     abstract type ProblemMixin end
     abstract type SolutionMixin end
@@ -14,8 +14,8 @@ module SimpleLinearAlgebra
         message::String
     end
 
-    include("forward-substitution.jl")
-    include("back-substitution.jl")
+    include("forward.jl")
+    include("back.jl")
     include("lu.jl")
     include("qr.jl")
 

@@ -1,12 +1,15 @@
+using LinearAlgebra
+
 @testset "forward substitution" begin
     n = 10
-    l = LinearAlgebra.tril(rand(n, n))
+    l = tril(rand(n, n))
     b = rand(n)
 
-    p = ForwardSubstitution(l, b)
-    s = kernel(p)
-    x = s.x
-    tol = p.tol
+    prob = ForwardSubstitution(l, b)
+    tol = prob.tol
+
+    soln = kernel(prob)
+    x = soln.x
 
     @test isapprox(l * x, b, atol=tol)
 end
