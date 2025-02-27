@@ -1,7 +1,7 @@
 abstract type EigenProblemMixin <: ProblemMixin end
 
 module Eigen
-    using LinearAlgebra, Printf
+    using LinearAlgebra
 
     import SimpleLinearAlgebra.EigenProblemMixin
     import SimpleLinearAlgebra.SolutionMixin
