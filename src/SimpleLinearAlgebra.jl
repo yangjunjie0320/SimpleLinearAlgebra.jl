@@ -1,7 +1,5 @@
 module SimpleLinearAlgebra
-
     using LinearAlgebra, Printf
-    using OMEinsum
 
     abstract type ProblemMixin end
     abstract type SolutionMixin end
@@ -18,6 +16,7 @@ module SimpleLinearAlgebra
     include("back.jl")
     include("lu.jl")
     include("qr.jl")
+    include("eig.jl")
 
     export kernel
 end

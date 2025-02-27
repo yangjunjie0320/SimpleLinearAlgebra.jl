@@ -16,3 +16,7 @@ end
 @testset "QR factorization" begin
     include("qr.jl")
 end
+
+@testset "Eigenvalue problems" begin
+    include("eig.jl")
+end
