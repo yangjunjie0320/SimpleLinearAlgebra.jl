@@ -78,3 +78,18 @@ end
     @test isapprox(pa, l * u, atol=tol)  # Verify PA = LU
     @test isapprox(p * a, l * u, atol=tol)
 end
+
+@testset "Cholesky factorization" begin
+    n = 10
+    q, r = rand(n, n) |> qr
+    a = q * Diagonal(rand(n)) * q'
+
+    prob = CholeskyFactorization(a)
+    tol = prob.tol
+
+    soln = kernel(prob)
+    l = soln.l
+    
+    @test istril(l)
+    @test isapprox(a, l * l', atol=tol) 
+end

@@ -152,3 +152,43 @@ kernel(prob::LUFactorizationProblemMixin) = LU.kernel(prob)
 
 LUFactorization = LU.GaussianEliminationV2
 export LUFactorization
+
+struct CholeskyFactorizationProblem <: ProblemMixin
+    a::AbstractMatrix
+    tol::Real
+    function CholeskyFactorizationProblem(a, tol=1e-10)
+        prob = new(a, tol)
+        return prob
+    end
+end
+
+struct CholeskyFactorizationSolution <: SolutionMixin
+    l::AbstractMatrix
+    function CholeskyFactorizationSolution(l)
+        @assert istril(l) "matrix must be lower triangular"
+        soln = new(l)
+        return soln
+    end
+end
+
+function kernel(prob::CholeskyFactorizationProblem)
+    tol = prob.tol
+    l = copy(prob.a)
+    n = size(l, 1)
+
+    for i in 1:n
+        @assert l[i, i] > tol "Cholesky factorization failed"
+        l[i, i] = sqrt(l[i, i])
+        l[i+1:n, i] /= l[i, i]
+
+        li = l[i+1:n, i]
+        l[i+1:n, i+1:n] -= li * li'
+    end
+
+    soln = CholeskyFactorizationSolution(tril(l))
+    return soln
+end
+
+CholeskyFactorization = CholeskyFactorizationProblem
+CholeskyDecomposition = CholeskyFactorization
+export CholeskyFactorization, CholeskyDecomposition

@@ -116,3 +116,52 @@ end
 
 kernel(prob::EigenProblemMixin) = Eigen.kernel(prob)
 export Eigen
+
+struct SingularValueDecompositionProblem <: ProblemMixin
+    a::AbstractMatrix
+    tol::Real    
+end
+
+struct SingularValueDecompositionSolution <: SolutionMixin
+    u::AbstractMatrix
+    s::AbstractMatrix
+    v::AbstractMatrix
+
+    function SingularValueDecompositionSolution(u, s, v)
+        s = Diagonal(s)
+        @assert isapprox(I, u' * u) "u must be orthogonal"
+        @assert isapprox(I, v' * v) "v must be orthogonal"
+
+        soln = new(u, s, v)
+        return soln
+    end
+end
+
+# we cheat by importing eigen and qr from LinearAlgebra
+import LinearAlgebra: eigen, qr
+function kernel(prob::SingularValueDecompositionProblem)
+    a = prob.a
+    tol = prob.tol
+   
+    n = size(a, 1)
+    e, c = eigen(a' * a)
+    q, r  = qr(a * c) |> (x -> (x.Q, x.R))
+
+    s = zeros(n)
+    rs = zeros(n, n)
+
+    for (i, ei) in enumerate(e)
+        @assert ei >= (tol * tol) "s2 must be non-negative"
+        s[i] = sqrt(ei)
+        rs[:, i] = r[:, i] / s[i]
+    end
+
+    u = Matrix(q)
+    v = c * rs
+
+    soln = SingularValueDecompositionSolution(u, s, v)
+    return soln
+end
+
+SingularValueDecomposition = SingularValueDecompositionProblem
+export SingularValueDecomposition
